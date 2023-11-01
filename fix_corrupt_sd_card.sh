@@ -39,12 +39,22 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # List partition names of the SD card using lsblk and save them into variables
-partition1=$(lsblk | grep -oE 'mmcblk0p[0-9]+' | head -n 1)
-partition2=$(lsblk | grep -oE 'mmcblk0p[0-9]+' | tail -n 1)
+partition1=""
+partition2=""
+
+partitions=($(lsblk | grep -oE 'mmcblk0p[0-9]+'))
+if [ "${#partitions[@]}" -eq 2 ]; then
+    partition1="${partitions[0]}"
+    partition2="${partitions[1]}"
+fi
 
 if [ -z "$partition1" ] || [ -z "$partition2" ]; then
-    echo "$(red "Partition names not found. Exiting.")"
-    exit 1
+    echo "$(yellow "Partition names not found. Please make sure the SD card is connected and available.")"
+    reading "Do you want to continue anyway? (y/n): " continue_response
+    if [ "$continue_response" != "y" ]; then
+        echo "$(red "Operation canceled. Exiting.")"
+        exit 1
+    fi
 fi
 
 # Display partition names
@@ -100,4 +110,3 @@ for partition in "$partition1" "$partition2"; do
 done
 
 echo "$(green "SD card maintenance completed.")"
-
