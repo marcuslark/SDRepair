@@ -13,6 +13,26 @@ green() { echo -e "\033[32m\033[01m$1\033[0m"; }
 yellow() { echo -e "\033[33m\033[01m$1\033[0m"; }
 reading() { read -rp "$(green "$1")" "$2"; }
 
+# Check if fsck is installed
+if ! command -v fsck &> /dev/null; then
+    echo "$(red "fsck is not installed. Installing util-linux...")"
+    if ! sudo apt-get install -y util-linux; then
+        echo "$(red "Failed to install util-linux. Please install it manually and rerun the script.")"
+        exit 1
+    fi
+    echo "$(green "util-linux (including fsck) has been installed.")"
+fi
+
+# Check if lsblk is installed
+if ! command -v lsblk &> /dev/null; then
+    echo "$(red "lsblk is not installed. Installing util-linux...")"
+    if ! sudo apt-get install -y util-linux; then
+        echo "$(red "Failed to install util-linux. Please install it manually and rerun the script.")"
+        exit 1
+    fi
+    echo "$(green "util-linux (including lsblk) has been installed.")"
+fi
+
 if [ "$EUID" -ne 0 ]; then
     echo "$(red "This script must be run with sudo. Please use 'sudo $0' to run the script.")"
     exit 1
@@ -80,3 +100,4 @@ for partition in "$partition1" "$partition2"; do
 done
 
 echo "$(green "SD card maintenance completed.")"
+
